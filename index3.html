@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚽ Football Quiz Arena - Game Mode Original</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap');
+:root{--primary:#00d4aa;--secondary:#ff3366;--accent:#ffd700;--dark:#0a0a1a;--darker:#050510;--card:#12122e;--card-hover:#1a1a3e;--text:#e0e0e0;--text-dim:#8888aa;--success:#00ff88;--danger:#ff4466;--warning:#ffaa00}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Rajdhani',sans-serif;background:var(--darker);color:var(--text);min-height:100vh;overflow-x:hidden}
+.bg-anim{position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at 20% 80%,rgba(0,212,170,0.08) 0%,transparent 50%),radial-gradient(ellipse at 80% 20%,rgba(255,51,102,0.08) 0%,transparent 50%),radial-gradient(ellipse at 50% 50%,rgba(255,215,0,0.03) 0%,transparent 70%);pointer-events:none;z-index:0}
+.particles{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:hidden}
+.particle{position:absolute;width:4px;height:4px;background:var(--primary);border-radius:50%;opacity:0.3;animation:float 15s infinite ease-in-out}
+@keyframes float{0%,100%{transform:translateY(100vh) rotate(0deg);opacity:0}10%{opacity:0.3}90%{opacity:0.3}100%{transform:translateY(-10vh) rotate(720deg);opacity:0}}
+header{position:relative;z-index:10;text-align:center;padding:30px 20px 20px}
+.logo{font-family:'Orbitron',sans-serif;font-size:2.5rem;font-weight:900;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 40px rgba(0,212,170,0.3);letter-spacing:2px}
+.tagline{color:var(--text-dim);font-size:1rem;margin-top:5px;letter-spacing:4px;text-transform:uppercase}
+.score-bar{display:flex;justify-content:center;gap:30px;margin:20px 0;flex-wrap:wrap}
+.score-item{background:var(--card);padding:10px 25px;border-radius:50px;border:1px solid rgba(0,212,170,0.2);font-family:'Orbitron',sans-serif;font-size:0.9rem}
+.score-item span{color:var(--primary);font-weight:700}
+.nav-tabs{display:flex;justify-content:center;gap:10px;padding:0 20px;margin-bottom:30px;flex-wrap:wrap;position:relative;z-index:10}
+.nav-tab{background:var(--card);border:1px solid rgba(255,255,255,0.05);color:var(--text-dim);padding:12px 24px;border-radius:12px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.95rem;transition:all 0.3s ease;display:flex;align-items:center;gap:8px}
+.nav-tab:hover{background:var(--card-hover);border-color:var(--primary);color:var(--text);transform:translateY(-2px)}
+.nav-tab.active{background:linear-gradient(135deg,rgba(0,212,170,0.15),rgba(255,51,102,0.1));border-color:var(--primary);color:var(--primary);box-shadow:0 0 20px rgba(0,212,170,0.15)}
+.game-container{max-width:900px;margin:0 auto;padding:0 20px 50px;position:relative;z-index:10}
+.game-panel{display:none;animation:fadeIn 0.5s ease}
+.game-panel.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.game-card{background:var(--card);border-radius:20px;padding:30px;border:1px solid rgba(255,255,255,0.05);box-shadow:0 10px 40px rgba(0,0,0,0.3)}
+.game-title{font-family:'Orbitron',sans-serif;font-size:1.5rem;color:var(--primary);margin-bottom:10px;display:flex;align-items:center;gap:12px}
+.game-desc{color:var(--text-dim);margin-bottom:25px;font-size:1rem}
+.btn{background:linear-gradient(135deg,var(--primary),#00a884);color:var(--dark);border:none;padding:14px 35px;border-radius:12px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.1rem;cursor:pointer;transition:all 0.3s ease;text-transform:uppercase;letter-spacing:1px}
+.btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(0,212,170,0.3)}
+.btn-secondary{background:linear-gradient(135deg,var(--secondary),#cc2255)}
+.btn-secondary:hover{box-shadow:0 10px 30px rgba(255,51,102,0.3)}
+.btn-outline{background:transparent;border:2px solid var(--primary);color:var(--primary)}
+.btn-outline:hover{background:var(--primary);color:var(--dark)}
+.options-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:20px 0}
+.option-btn{background:var(--darker);border:2px solid rgba(255,255,255,0.08);color:var(--text);padding:16px 20px;border-radius:12px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-weight:600;font-size:1rem;transition:all 0.3s ease;text-align:center}
+.option-btn:hover{border-color:var(--primary);background:rgba(0,212,170,0.05);transform:translateY(-2px)}
+.option-btn.correct{border-color:var(--success);background:rgba(0,255,136,0.1);color:var(--success)}
+.option-btn.wrong{border-color:var(--danger);background:rgba(255,68,102,0.1);color:var(--danger)}
+.option-btn:disabled{cursor:not-allowed;opacity:0.7}
+.progress-bar{width:100%;height:8px;background:var(--darker);border-radius:4px;overflow:hidden;margin:20px 0}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:4px;transition:width 0.5s ease}
+.timer-bar{width:100%;height:6px;background:var(--darker);border-radius:3px;overflow:hidden;margin:15px 0}
+.timer-fill{height:100%;background:linear-gradient(90deg,var(--success),var(--warning),var(--danger));border-radius:3px;transition:width 0.1s linear}
+.kit-display{display:flex;justify-content:center;gap:20px;margin:25px 0;flex-wrap:wrap}
+.kit-shirt{width:80px;height:100px;border-radius:10px 10px 5px 5px;position:relative;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-size:1.5rem;font-weight:900;color:white;text-shadow:0 2px 4px rgba(0,0,0,0.5);box-shadow:0 5px 20px rgba(0,0,0,0.3)}
+.kit-shirt::before{content:'';position:absolute;top:-15px;left:50%;transform:translateX(-50%);width:40px;height:20px;background:inherit;border-radius:10px 10px 0 0}
+.tactical-board{background:linear-gradient(180deg,#1a5c1a 0%,#0d3d0d 100%);border-radius:15px;padding:30px;position:relative;margin:20px 0;border:3px solid rgba(255,255,255,0.1)}
+.tactical-board::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:120px;height:120px;border:2px solid rgba(255,255,255,0.2);border-radius:50%}
+.tactical-board::after{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:2px;height:100%;background:rgba(255,255,255,0.2)}
+.formation-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;position:relative;z-index:2}
+.formation-slot{background:rgba(255,255,255,0.1);border:2px dashed rgba(255,255,255,0.3);border-radius:12px;padding:15px;text-align:center;min-height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all 0.3s ease}
+.formation-slot:hover{background:rgba(255,255,255,0.15);border-color:var(--primary)}
+.formation-slot.filled{background:rgba(0,212,170,0.15);border:2px solid var(--primary);border-style:solid}
+.slot-pos{font-size:0.75rem;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:1px}
+.slot-player{font-weight:700;color:var(--primary);margin-top:5px}
+.transfer-chain{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px;margin:25px 0}
+.transfer-node{background:var(--darker);border:2px solid var(--primary);border-radius:12px;padding:12px 18px;font-weight:700;color:var(--primary)}
+.transfer-arrow{color:var(--accent);font-size:1.5rem}
+.derby-matchup{display:flex;align-items:center;justify-content:center;gap:20px;margin:25px 0;flex-wrap:wrap}
+.derby-team{background:var(--darker);border-radius:15px;padding:25px 35px;text-align:center;min-width:150px;border:2px solid rgba(255,255,255,0.1)}
+.derby-team .team-name{font-family:'Orbitron',sans-serif;font-size:1.2rem;font-weight:700}
+.derby-vs{font-family:'Orbitron',sans-serif;font-size:1.5rem;color:var(--secondary);font-weight:900}
+.timeline-items-container{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:25px 0}
+.timeline-card{background:var(--darker);border:2px solid rgba(0,212,170,0.3);border-radius:12px;padding:15px 20px;cursor:pointer;transition:all 0.3s ease;min-width:200px;text-align:center}
+.timeline-card:hover{border-color:var(--primary);transform:translateY(-2px)}
+.timeline-card.selected{border-color:var(--accent);background:rgba(255,215,0,0.1)}
+.timeline-year{color:var(--primary);font-family:'Orbitron',sans-serif;font-weight:700;font-size:0.9rem}
+.timeline-event{color:var(--text);font-weight:600;margin-top:5px;font-size:0.9rem}
+.penalty-area{background:linear-gradient(180deg,#1a5c1a 0%,#0d3d0d 100%);border-radius:15px;padding:40px;text-align:center;position:relative;margin:20px 0;border:3px solid rgba(255,255,255,0.1)}
+.goal-keeper{width:60px;height:60px;background:var(--secondary);border-radius:50%;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;font-size:1.5rem}
+.goal-net{width:200px;height:80px;border:4px solid white;border-bottom:none;margin:0 auto;border-radius:10px 10px 0 0;position:relative}
+.goal-net::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,transparent,transparent 10px,rgba(255,255,255,0.1) 10px,rgba(255,255,255,0.1) 11px),repeating-linear-gradient(90deg,transparent,transparent 10px,rgba(255,255,255,0.1) 10px,rgba(255,255,255,0.1) 11px)}
+.result-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(5,5,16,0.95);display:none;align-items:center;justify-content:center;z-index:100;flex-direction:column;gap:20px}
+.result-overlay.active{display:flex}
+.result-title{font-family:'Orbitron',sans-serif;font-size:2.5rem;font-weight:900}
+.result-title.win{color:var(--success)}
+.result-title.lose{color:var(--danger)}
+.result-score{font-size:4rem;font-family:'Orbitron',sans-serif;font-weight:900;color:var(--accent)}
+.hint-box{background:rgba(255,215,0,0.1);border:1px solid var(--accent);border-radius:10px;padding:15px;margin:15px 0;color:var(--accent);font-style:italic}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.pulse{animation:pulse 2s infinite}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+.shake{animation:shake 0.5s ease}
+@media(max-width:600px){.logo{font-size:1.5rem}.game-title{font-size:1.1rem}.options-grid{grid-template-columns:1fr}.formation-slots{grid-template-columns:repeat(2,1fr)}.derby-matchup{flex-direction:column}.transfer-chain{flex-direction:column}.transfer-arrow{transform:rotate(90deg)}}
+</style>
+</head>
+<body>
+<div class="bg-anim"></div>
+<div class="particles" id="particles"></div>
+
+<header>
+  <div class="logo">⚽ FOOTBALL QUIZ ARENA</div>
+  <div class="tagline">Game Mode Original</div>
+  <div class="score-bar">
+    <div class="score-item">⭐ Total Poin: <span id="totalScore">0</span></div>
+    <div class="score-item">🔥 Streak: <span id="streakCount">0</span></div>
+    <div class="score-item">🏆 Level: <span id="playerLevel">1</span></div>
+  </div>
+</header>
+
+<nav class="nav-tabs">
+  <button class="nav-tab active" onclick="switchGame('tactical',this)">🎯 Tactical Board</button>
+  <button class="nav-tab" onclick="switchGame('transfer',this)">🔗 Transfer Detective</button>
+  <button class="nav-tab" onclick="switchGame('derby',this)">⚔️ Derby Days</button>
+  <button class="nav-tab" onclick="switchGame('kit',this)">👕 Kit Collector</button>
+  <button class="nav-tab" onclick="switchGame('penalty',this)">🥅 Penalty Rush</button>
+  <button class="nav-tab" onclick="switchGame('timeline',this)">📅 Football Timeline</button>
+</nav>
+
+<div class="game-container">
+
+  <!-- TACTICAL BOARD -->
+  <div id="game-tactical" class="game-panel active">
+    <div class="game-card">
+      <div class="game-title">🎯 Tactical Board</div>
+      <div class="game-desc">Susun formasi taktis yang benar berdasarkan clue. Pilih pemain untuk setiap posisi!</div>
+      <div class="progress-bar"><div class="progress-fill" id="tacticalProgress" style="width:0%"></div></div>
+      <div id="tacticalQuestion">
+        <div class="hint-box" id="tacticalClue">Clue akan muncul di sini...</div>
+        <div class="tactical-board">
+          <div class="formation-slots" id="formationSlots">
+            <div class="formation-slot" data-pos="GK" onclick="selectSlot(this)"><div class="slot-pos">GK</div><div class="slot-player">?</div></div>
+            <div class="formation-slot" data-pos="CB" onclick="selectSlot(this)"><div class="slot-pos">CB</div><div class="slot-player">?</div></div>
+            <div class="formation-slot" data-pos="CM" onclick="selectSlot(this)"><div class="slot-pos">CM</div><div class="slot-player">?</div></div>
+            <div class="formation-slot" data-pos="ST" onclick="selectSlot(this)"><div class="slot-pos">ST</div><div class="slot-player">?</div></div>
+          </div>
+        </div>
+        <div class="options-grid" id="tacticalOptions"></div>
+        <div style="text-align:center;margin-top:20px;">
+          <button class="btn" onclick="checkTactical()">✅ Konfirmasi Formasi</button>
+          <button class="btn btn-outline" onclick="nextTactical()" style="margin-left:10px;">⏭️ Skip</button>
+        </div>
+      </div>
+      <div id="tacticalResult" style="display:none;text-align:center;">
+        <div id="tacticalFeedback" style="font-size:1.3rem;margin:20px 0;"></div>
+        <button class="btn" onclick="nextTactical()">Lanjutkan ➡️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRANSFER DETECTIVE -->
+  <div id="game-transfer" class="game-panel">
+    <div class="game-card">
+      <div class="game-title">🔗 Transfer Detective</div>
+      <div class="game-desc">Tebak pemain dari rantai transfer karirnya. Lihat klub yang pernah ia bela!</div>
+      <div class="progress-bar"><div class="progress-fill" id="transferProgress" style="width:0%"></div></div>
+      <div id="transferQuestion">
+        <div class="hint-box" id="transferHint">Hint akan muncul di sini...</div>
+        <div class="transfer-chain" id="transferChain"></div>
+        <div class="options-grid" id="transferOptions"></div>
+        <div style="text-align:center;margin-top:20px;">
+          <button class="btn btn-outline" onclick="revealTransferHint()">💡 Hint (-50 poin)</button>
+        </div>
+      </div>
+      <div id="transferResult" style="display:none;text-align:center;">
+        <div id="transferFeedback" style="font-size:1.3rem;margin:20px 0;"></div>
+        <button class="btn" onclick="nextTransfer()">Lanjutkan ➡️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DERBY DAYS -->
+  <div id="game-derby" class="game-panel">
+    <div class="game-card">
+      <div class="game-title">⚔️ Derby Days</div>
+      <div class="game-desc">Tebak rivalitas derby dari seluruh dunia. Dari El Clasico sampai Superclasico!</div>
+      <div class="progress-bar"><div class="progress-fill" id="derbyProgress" style="width:0%"></div></div>
+      <div id="derbyQuestion">
+        <div class="hint-box" id="derbyClue">Clue derby akan muncul di sini...</div>
+        <div class="derby-matchup" id="derbyMatchup"></div>
+        <div style="text-align:center;margin:20px 0;font-size:1.1rem;color:var(--text-dim);">Nama derby ini adalah?</div>
+        <div class="options-grid" id="derbyOptions"></div>
+      </div>
+      <div id="derbyResult" style="display:none;text-align:center;">
+        <div id="derbyFeedback" style="font-size:1.3rem;margin:20px 0;"></div>
+        <button class="btn" onclick="nextDerby()">Lanjutkan ➡️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- KIT COLLECTOR -->
+  <div id="game-kit" class="game-panel">
+    <div class="game-card">
+      <div class="game-title">👕 Kit Collector</div>
+      <div class="game-desc">Tebak klub dari warna jersey home, away, dan third kit-nya. Collector sejati pasti tahu!</div>
+      <div class="progress-bar"><div class="progress-fill" id="kitProgress" style="width:0%"></div></div>
+      <div id="kitQuestion">
+        <div style="text-align:center;margin-bottom:15px;color:var(--text-dim);">Tebak klub dari kit berikut:</div>
+        <div class="kit-display" id="kitDisplay"></div>
+        <div class="hint-box" id="kitHint" style="display:none;"></div>
+        <div class="options-grid" id="kitOptions"></div>
+        <div style="text-align:center;margin-top:20px;">
+          <button class="btn btn-outline" onclick="revealKitHint()">👀 Lihat Hint (-30 poin)</button>
+        </div>
+      </div>
+      <div id="kitResult" style="display:none;text-align:center;">
+        <div id="kitFeedback" style="font-size:1.3rem;margin:20px 0;"></div>
+        <button class="btn" onclick="nextKit()">Lanjutkan ➡️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PENALTY RUSH -->
+  <div id="game-penalty" class="game-panel">
+    <div class="game-card">
+      <div class="game-title">🥅 Penalty Rush</div>
+      <div class="game-desc">Quiz cepat dengan timer! Jawab sebanyak mungkin sebelum waktu habis. Setiap benar = 1 gol!</div>
+      <div class="timer-bar"><div class="timer-fill" id="penaltyTimer" style="width:100%"></div></div>
+      <div style="text-align:center;color:var(--text-dim);margin-bottom:15px;">
+        Waktu: <span id="timerDisplay" style="color:var(--primary);font-weight:700;">60</span> detik | 
+        Gol: <span id="goalCount" style="color:var(--success);font-weight:700;">0</span> | 
+        Tendangan: <span id="shotCount" style="color:var(--accent);font-weight:700;">0</span>/10
+      </div>
+      <div id="penaltyQuestion" style="display:none;">
+        <div id="penaltyQText" style="font-size:1.3rem;text-align:center;margin:25px 0;font-weight:700;"></div>
+        <div class="penalty-area">
+          <div class="goal-keeper">🧤</div>
+          <div class="goal-net"></div>
+        </div>
+        <div class="options-grid" id="penaltyOptions"></div>
+      </div>
+      <div id="penaltyStart" style="text-align:center;padding:40px;">
+        <div style="font-size:1.2rem;margin-bottom:20px;color:var(--text-dim);">
+          Kamu punya <strong style="color:var(--primary);">60 detik</strong> untuk menjawab <strong style="color:var(--accent);">10 pertanyaan</strong>.<br>
+          Setiap jawaban benar = <strong style="color:var(--success);">1 Gol</strong>!
+        </div>
+        <button class="btn pulse" onclick="startPenaltyRush()">▶️ Mulai Penalty Rush</button>
+      </div>
+      <div id="penaltyResult" style="display:none;text-align:center;">
+        <div id="penaltyFeedback" style="font-size:1.5rem;margin:20px 0;"></div>
+        <div id="penaltyStats" style="color:var(--text-dim);margin-bottom:20px;"></div>
+        <button class="btn" onclick="resetPenalty()">🔄 Main Lagi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTBALL TIMELINE -->
+  <div id="game-timeline" class="game-panel">
+    <div class="game-card">
+      <div class="game-title">📅 Football Timeline</div>
+      <div class="game-desc">Urutkan event-event penting dalam sejarah sepak bola dari yang PALING LAMA ke PALING BARU. Klik card untuk memindahkan posisi!</div>
+      <div class="progress-bar"><div class="progress-fill" id="timelineProgress" style="width:0%"></div></div>
+      <div id="timelineQuestion">
+        <div class="hint-box">Urutkan event berikut dari yang PALING LAMA ke PALING BARU (klik card untuk memindahkan ke posisi berikutnya):</div>
+        <div class="timeline-items-container" id="timelineItems"></div>
+        <div style="text-align:center;margin-top:20px;">
+          <button class="btn" onclick="checkTimeline()">✅ Periksa Urutan</button>
+          <button class="btn btn-outline" onclick="shuffleTimeline()" style="margin-left:10px;">🔀 Acak Ulang</button>
+        </div>
+      </div>
+      <div id="timelineResult" style="display:none;text-align:center;">
+        <div id="timelineFeedback" style="font-size:1.3rem;margin:20px 0;"></div>
+        <button class="btn" onclick="nextTimeline()">Lanjutkan ➡️</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="result-overlay" id="resultOverlay">
+  <div class="result-title" id="resultTitle"></div>
+  <div class="result-score" id="resultScore"></div>
+  <div style="color:var(--text-dim);font-size:1.1rem;" id="resultMessage"></div>
+  <button class="btn" onclick="closeOverlay()" style="margin-top:20px;">Tutup</button>
+</div>
+
+<script>
+// ==================== GAME DATA ====================
+const tacticalData=[
+{clue:"Formasi ini memenangkan Liga Champions 2022. Tim asal Spanyol dengan pelatih Italia.",formation:{GK:"Thibaut Courtois",CB:"Eder Militao",CM:"Luka Modric",ST:"Karim Benzema"},options:["Thibaut Courtois","Eder Militao","Luka Modric","Karim Benzema","Manuel Neuer","Virgil van Dijk","Kevin De Bruyne","Erling Haaland","Jan Oblak","Sergio Ramos","Toni Kroos","Vinicius Jr"]},
+{clue:"Formasi tim yang memenangkan Piala Dunia 2022. Tim dari Amerika Selatan.",formation:{GK:"Emiliano Martinez",CB:"Nicolas Otamendi",CM:"Enzo Fernandez",ST:"Lionel Messi"},options:["Emiliano Martinez","Nicolas Otamendi","Enzo Fernandez","Lionel Messi","Alisson Becker","Marquinhos","Casemiro","Neymar","Hugo Lloris","Raphael Varane","Antoine Griezmann","Kylian Mbappe"]},
+{clue:"Formasi tim yang memenangkan Euro 2020 (dimainkan 2021). Tim dengan pertahanan terbaik turnamen.",formation:{GK:"Gianluigi Donnarumma",CB:"Leonardo Bonucci",CM:"Jorginho",ST:"Ciro Immobile"},options:["Gianluigi Donnarumma","Leonardo Bonucci","Jorginho","Ciro Immobile","Jordan Pickford","Harry Maguire","Declan Rice","Harry Kane","Unai Simon","Aymeric Laporte","Sergio Busquets","Alvaro Morata"]},
+{clue:"Formasi 'Invincibles' Arsenal 2003-04. Tim yang tak terkalahkan sepanjang musim Premier League.",formation:{GK:"Jens Lehmann",CB:"Sol Campbell",CM:"Patrick Vieira",ST:"Thierry Henry"},options:["Jens Lehmann","Sol Campbell","Patrick Vieira","Thierry Henry","David Seaman","Tony Adams","Cesc Fabregas","Dennis Bergkamp","Petr Cech","John Terry","Frank Lampard","Didier Drogba"]},
+{clue:"Formasi Barcelona 'Dream Team' era Johan Cruyff yang memenangkan Liga Champions pertama klub (1992).",formation:{GK:"Andoni Zubizarreta",CB:"Ronald Koeman",CM:"Pep Guardiola",ST:"Hristo Stoichkov"},options:["Andoni Zubizarreta","Ronald Koeman","Pep Guardiola","Hristo Stoichkov","Victor Valdes","Carles Puyol","Xavi Hernandez","Lionel Messi","Iker Casillas","Fernando Hierro","Luis Enrique","Raul Gonzalez"]},
+{clue:"Formasi Manchester United 'Class of 92' era Sir Alex Ferguson yang memenangkan treble 1999.",formation:{GK:"Peter Schmeichel",CB:"Jaap Stam",CM:"David Beckham",ST:"Dwight Yorke"},options:["Peter Schmeichel","Jaap Stam","David Beckham","Dwight Yorke","Edwin van der Sar","Rio Ferdinand","Paul Scholes","Ruud van Nistelrooy","Fabien Barthez","Laurent Blanc","Ryan Giggs","Andy Cole"]},
+{clue:"Formasi AC Milan era Arrigo Sacchi yang mendominasi Eropa akhir 80-an dengan pressing tinggi.",formation:{GK:"Giovanni Galli",CB:"Franco Baresi",CM:"Frank Rijkaard",ST:"Marco van Basten"},options:["Giovanni Galli","Franco Baresi","Frank Rijkaard","Marco van Basten","Dida","Alessandro Nesta","Andrea Pirlo","Filippo Inzaghi","Gianluca Pagliuca","Giuseppe Bergomi","Roberto Donadoni","Ruud Gullit"]},
+{clue:"Formasi Liverpool era Jurgen Klopp yang memenangkan Liga Champions 2019 di Madrid.",formation:{GK:"Alisson Becker",CB:"Virgil van Dijk",CM:"Jordan Henderson",ST:"Mohamed Salah"},options:["Alisson Becker","Virgil van Dijk","Jordan Henderson","Mohamed Salah","Loris Karius","Joel Matip","James Milner","Sadio Mane","Simon Mignolet","Dejan Lovren","Georginio Wijnaldum","Roberto Firmino"]}
+];
+
+const transferData=[
+{chain:["Santos","Barcelona","Paris Saint-Germain","Al-Hilal"],player:"Neymar",hint:"Pemain Brasil yang pernah menjadi rekor transfer dunia.",options:["Neymar","Ronaldinho","Rivaldo","Romario","Kaka","Ronaldo Nazario"]},
+{chain:["Sporting CP","Manchester United","Real Madrid","Juventus","Al-Nassr"],player:"Cristiano Ronaldo",hint:"Pemain dengan 5 Ballon d'Or, pernah membela 3 klub top Eropa.",options:["Cristiano Ronaldo","Luis Figo","Deco","Ricardo Quaresma","Nani","Angel Di Maria"]},
+{chain:["Newell's Old Boys","Barcelona","Paris Saint-Germain","Inter Miami"],player:"Lionel Messi",hint:"Pemain Argentina dengan 8 Ballon d'Or.",options:["Lionel Messi","Gabriel Batistuta","Carlos Tevez","Sergio Aguero","Gonzalo Higuain","Angel Di Maria"]},
+{chain:["Ajax","Juventus","Inter Milan","Barcelona","AC Milan","Paris Saint-Germain"],player:"Zlatan Ibrahimovic",hint:"Striker Swedia yang pernah membela hampir semua klub top Eropa.",options:["Zlatan Ibrahimovic","Henrik Larsson","Freddie Ljungberg","Olof Mellberg","Marcus Berg","Alexander Isak"]},
+{chain:["Shakhtar Donetsk","Manchester City","Chelsea"],player:"Willian",hint:"Winger Brasil yang membela 2 klub London.",options:["Willian","Douglas Costa","Bernard","Fred","Fernandinho","Alex Teixeira"]},
+{chain:["Monaco","Paris Saint-Germain","Manchester United","Inter Miami"],player:"David Beckham",hint:"Legenda Inggris yang memulai karir di London tapi bukan Arsenal atau Chelsea.",options:["David Beckham","Wayne Rooney","Paul Scholes","Ryan Giggs","Gary Neville","Phil Neville"]},
+{chain:["Borussia Dortmund","Bayern Munich","Barcelona","Inter Miami"],player:"Robert Lewandowski",hint:"Striker Polandia yang mencetak 5 gol dalam 9 menit.",options:["Robert Lewandowski","Miroslav Klose","Lukas Podolski","Arkadiusz Milik","Krzysztof Piatek","Wojciech Szczesny"]},
+{chain:["River Plate","Real Madrid","Napoli","Juventus"],player:"Gonzalo Higuain",hint:"Striker Argentina yang memecahkan rekor gol Serie A dalam satu musim.",options:["Gonzalo Higuain","Sergio Aguero","Carlos Tevez","Ezequiel Lavezzi","Mauro Icardi","Paulo Dybala"]}
+];
+
+const derbyData=[
+{team1:"Real Madrid",team2:"Barcelona",name:"El Clasico",clue:"Derby terbesar di dunia. Dua raksasa dari Spanyol. Pertandingan paling banyak ditonton di planet ini.",options:["El Clasico","El Derbi Madrileno","El Gran Derbi","Derbi de la Comunitat","El Derbi Barceloni","El Partidazo"]},
+{team1:"Boca Juniors",team2:"River Plate",name:"Superclasico",clue:"Derby paling gila di dunia. Dua tim dari Buenos Aires, Argentina. Stadionnya berguncang.",options:["Superclasico","El Clasico","Derbi de Avellaneda","El Clasico Platense","El Derbi Porteno","El Gran Derbi"]},
+{team1:"Celtic",team2:"Rangers",name:"Old Firm Derby",clue:"Derby Glasgow, Skotlandia. Lebih dari sekadar sepak bola - ada unsur agama dan politik di dalamnya.",options:["Old Firm Derby","Edinburgh Derby","Dundee Derby","Highland Derby","Ayrshire Derby","Lanarkshire Derby"]},
+{team1:"Liverpool",team2:"Manchester United",name:"North West Derby",clue:"Derby dua klub paling sukses di Inggris. Bukan derby kota, tapi derby persaingan sejarah.",options:["North West Derby","Merseyside Derby","Manchester Derby","Roses Derby","A49 Derby","East Lancashire Derby"]},
+{team1:"AC Milan",team2:"Inter Milan",name:"Derby della Madonnina",clue:"Derby kota Milan, Italia. Dua klub berbagi stadion yang sama - San Siro.",options:["Derby della Madonnina","Derby d'Italia","Derby del Sole","Derby della Capitale","Derby dello Stretto","Derby di Milano"]},
+{team1:"Fenerbahce",team2:"Galatasaray",name:"Intercontinental Derby",clue:"Derby Istanbul, Turki. Dua klub dari benua berbeda - Asia dan Eropa.",options:["Intercontinental Derby","Istanbul Derby","Anatolian Derby","Bosphorus Derby","Turkish Derby","Eurasia Derby"]},
+{team1:"Flamengo",team2:"Fluminense",name:"Fla-Flu",clue:"Derby Rio de Janeiro, Brasil. Nama singkatan dari kedua klub yang digabung.",options:["Fla-Flu","Classico dos Milhoes","Classico Vovo","Gre-Nal","Majestoso","Paulista Derby"]},
+{team1:"Ajax",team2:"Feyenoord",name:"De Klassieker",clue:"Derby terbesar di Belanda. Amsterdam vs Rotterdam. Dua kota terbesar di negara tersebut.",options:["De Klassieker","De Topper","Het Zuidelijke Derby","De Randstedelijke Derby","Holland Derby","Dutch Derby"]}
+];
+
+const kitData=[
+{club:"Juventus",home:"#000000",away:"#FFFFFF",third:"#FFDD00",hint:"Klub Italia yang pernah dihukum pengurangan poin karena skandal pengaturan skor.",options:["Juventus","AC Milan","Inter Milan","AS Roma","Napoli","Lazio"]},
+{club:"Borussia Dortmund",home:"#FDE100",away:"#000000",third:"#A0A0A0",hint:"Klub Jerman dengan stadion paling ramai di Eropa - Signal Iduna Park.",options:["Borussia Dortmund","Bayern Munich","Schalke 04","Bayer Leverkusen","RB Leipzig","Wolfsburg"]},
+{club:"Atletico Madrid",home:"#CB3524",away:"#1A3C8E",third:"#FFD700",hint:"Klub Madrid yang bermain di Wanda Metropolitano. Simbolnya adalah beruang dan pohon stroberi.",options:["Atletico Madrid","Real Madrid","Sevilla","Valencia","Athletic Bilbao","Real Sociedad"]},
+{club:"Chelsea",home:"#034694",away:"#FFFFFF",third:"#1A1A1A",hint:"Klub London yang bermarkas di Stamford Bridge. The Blues.",options:["Chelsea","Arsenal","Tottenham","Manchester City","Liverpool","Everton"]},
+{club:"Benfica",home:"#E30613",away:"#FFFFFF",third:"#1A1A1A",hint:"Klub Portugal dengan stadion Estadio da Luz. Elang merah adalah simbolnya.",options:["Benfica","Porto","Sporting CP","Braga","Vitoria Guimaraes","Rio Ave"]},
+{club:"Ajax",home:"#E30613",away:"#1A3C8E",third:"#FFD700",hint:"Klub Belanda terkenal dengan akademinya. Total Football adalah filosofinya.",options:["Ajax","PSV Eindhoven","Feyenoord","AZ Alkmaar","Utrecht","Heerenveen"]},
+{club:"River Plate",home:"#FFFFFF",away:"#E30613",third:"#1A1A1A",hint:"Klub Argentina dari Buenos Aires. Stadionnya Monumental. Bukan dari La Boca.",options:["River Plate","Boca Juniors","Racing Club","Independiente","San Lorenzo","Velez Sarsfield"]},
+{club:"Al Ahly",home:"#E30613",away:"#FFFFFF",third:"#1A3C8E",hint:"Klub paling sukses di Afrika. Dari Kairo, Mesir. The Club of the Century.",options:["Al Ahly","Zamalek","Wydad Casablanca","Raja Casablanca","Esperance","Mamelodi Sundowns"]}
+];
+
+const penaltyData=[
+{q:"Siapa pemain dengan gol terbanyak sepanjang sejarah Piala Dunia?",a:"Miroslav Klose",options:["Miroslav Klose","Ronaldo Nazario","Gerd Muller","Just Fontaine","Pele","Lionel Messi"]},
+{q:"Klub mana yang memenangkan Liga Champions terbanyak sepanjang sejarah?",a:"Real Madrid",options:["Real Madrid","AC Milan","Liverpool","Bayern Munich","Barcelona","Manchester United"]},
+{q:"Siapa satu-satunya pemain yang memenangkan 3 Piala Dunia?",a:"Pele",options:["Pele","Diego Maradona","Franz Beckenbauer","Garrincha","Cafu","Ronaldo Nazario"]},
+{q:"Stadion mana yang menjadi venue final Piala Dunia 2022?",a:"Lusail Stadium",options:["Lusail Stadium","Al Bayt Stadium","Al Janoub Stadium","Education City Stadium","Ahmad bin Ali Stadium","Khalifa International Stadium"]},
+{q:"Siapa pemain termuda yang mencetak gol di Piala Dunia?",a:"Pele (1958)",options:["Pele (1958)","Kylian Mbappe (2018)","Lionel Messi (2006)","Michael Owen (1998)","Julian Green (2014)","Norman Whiteside (1982)"]},
+{q:"Negara mana yang memenangkan Piala Dunia 2010?",a:"Spanyol",options:["Spanyol","Belanda","Jerman","Uruguay","Argentina","Brasil"]},
+{q:"Siapa pencetak gol terbanyak dalam satu musim Liga Champions?",a:"Cristiano Ronaldo (17 gol)",options:["Cristiano Ronaldo (17 gol)","Lionel Messi (14 gol)","Robert Lewandowski (15 gol)","Karim Benzema (15 gol)","Ruud van Nistelrooy (12 gol)","Erling Haaland (15 gol)"]},
+{q:"Klub mana yang memenangkan Premier League tanpa terkalahkan (Invincibles)?",a:"Arsenal (2003-04)",options:["Arsenal (2003-04)","Manchester United (1998-99)","Chelsea (2004-05)","Liverpool (2019-20)","Manchester City (2017-18)","Blackburn Rovers (1994-95)"]},
+{q:"Siapa pemain dengan assist terbanyak dalam sejarah Liga Champions?",a:"Cristiano Ronaldo",options:["Cristiano Ronaldo","Lionel Messi","Ryan Giggs","Xavi Hernandez","Andres Iniesta","Thomas Muller"]},
+{q:"Negara mana yang menjadi tuan rumah Piala Dunia 2026?",a:"Amerika Serikat, Kanada, Meksiko",options:["Amerika Serikat, Kanada, Meksiko","Inggris","Qatar","Brasil","Jerman","Prancis"]},
+{q:"Siapa kiper dengan clean sheet terbanyak dalam sejarah Premier League?",a:"Petr Cech",options:["Petr Cech","David de Gea","Edwin van der Sar","Joe Hart","Thibaut Courtois","Alisson Becker"]},
+{q:"Siapa pelatih yang memenangkan treble dengan Inter Milan (2010)?",a:"Jose Mourinho",options:["Jose Mourinho","Roberto Mancini","Carlo Ancelotti","Pep Guardiola","Massimiliano Allegri","Antonio Conte"]},
+{q:"Klub mana yang memiliki julukan 'The Old Lady'?",a:"Juventus",options:["Juventus","AC Milan","Inter Milan","AS Roma","Napoli","Lazio"]},
+{q:"Siapa pemain dengan gol terbanyak dalam sejarah El Clasico?",a:"Lionel Messi",options:["Lionel Messi","Cristiano Ronaldo","Alfredo Di Stefano","Raul","Cesar Rodriguez","Karim Benzema"]},
+{q:"Stadion mana yang menjadi kandang Manchester United?",a:"Old Trafford",options:["Old Trafford","Anfield","Etihad Stadium","Stamford Bridge","Emirates Stadium","Tottenham Hotspur Stadium"]}
+];
+
+const timelineData=[
+{events:[{year:1863,event:"The Football Association (FA) didirikan di Inggris"},{year:1930,event:"Piala Dunia pertama kali diadakan di Uruguay"},{year:1958,event:"Pele memenangkan Piala Dunia pertamanya di usia 17 tahun"},{year:1992,event:"Premier League didirikan, menggantikan First Division"},{year:2004,event:"Greece memenangkan Euro 2004 sebagai underdog"},{year:2022,event:"Argentina memenangkan Piala Dunia Qatar"}]},
+{events:[{year:1900,event:"Sepak bola masuk Olimpiade untuk pertama kalinya"},{year:1954,event:"Hungaria mencetak rekor 27 gol dalam satu Piala Dunia"},{year:1970,event:"Brasil memenangkan Piala Dunia ketiga kalinya dan mendapatkan Jules Rimet permanen"},{year:1998,event:"Prancis memenangkan Piala Dunia di kandang sendiri"},{year:2005,event:"Liverpool comeback dari 0-3 melawan AC Milan di final Liga Champions (The Miracle of Istanbul)"},{year:2016,event:"Leicester City memenangkan Premier League dengan odds 5000-1"}]},
+{events:[{year:1872,event:"Pertandingan internasional pertama: Inggris vs Skotlandia"},{year:1953,event:"Match of the Century: Hungaria mengalahkan Inggris 6-3 di Wembley"},{year:1966,event:"Inggris memenangkan Piala Dunia di kandang sendiri"},{year:1986,event:"Hand of God dan Goal of the Century oleh Maradona"},{year:2009,event:"Barcelona memenangkan treble pertama dalam sejarah Spanyol"},{year:2021,event:"Italia memenangkan Euro 2020 di Wembley melawan Inggris"}]}
+];
+
+// ==================== GAME STATE ====================
+let state={totalScore:0,streak:0,level:1,currentGame:'tactical',tacticalIndex:0,transferIndex:0,derbyIndex:0,kitIndex:0,penaltyActive:false,penaltyScore:0,penaltyShots:0,penaltyTime:60,penaltyTimerId:null,timelineIndex:0,selectedSlot:null,tacticalSelections:{}};
+
+// ==================== UTILITIES ====================
+function shuffleArray(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function updateScore(points){state.totalScore+=points;document.getElementById('totalScore').textContent=state.totalScore;const newLevel=Math.floor(state.totalScore/500)+1;if(newLevel>state.level){state.level=newLevel;document.getElementById('playerLevel').textContent=state.level;showOverlay('LEVEL UP!',state.level,'Selamat! Kamu naik ke Level '+state.level+'!')}}
+function updateStreak(correct){if(correct){state.streak++}else{state.streak=0}document.getElementById('streakCount').textContent=state.streak}
+function showOverlay(title,score,message,isWin){document.getElementById('resultTitle').textContent=title;document.getElementById('resultTitle').className='result-title '+(isWin!==false?'win':'lose');document.getElementById('resultScore').textContent=typeof score==='number'?'+'+score+' POIN':score;document.getElementById('resultMessage').textContent=message;document.getElementById('resultOverlay').classList.add('active')}
+function closeOverlay(){document.getElementById('resultOverlay').classList.remove('active')}
+function createParticles(){const container=document.getElementById('particles');for(let i=0;i<30;i++){const p=document.createElement('div');p.className='particle';p.style.left=Math.random()*100+'%';p.style.animationDelay=Math.random()*15+'s';p.style.animationDuration=(10+Math.random()*10)+'s';container.appendChild(p)}}
+
+// ==================== NAVIGATION ====================
+function switchGame(game,btn){state.currentGame=game;document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.game-panel').forEach(p=>p.classList.remove('active'));if(btn)btn.classList.add('active');document.getElementById('game-'+game).classList.add('active')}
+
+// ==================== TACTICAL BOARD ====================
+function initTactical(){const data=tacticalData[state.tacticalIndex];document.getElementById('tacticalClue').textContent=data.clue;document.getElementById('tacticalQuestion').style.display='block';document.getElementById('tacticalResult').style.display='none';state.tacticalSelections={};state.selectedSlot=null;document.querySelectorAll('.formation-slot').forEach(slot=>{slot.classList.remove('filled');slot.querySelector('.slot-player').textContent='?';slot.style.borderColor=''});const opts=shuffleArray(data.options);const grid=document.getElementById('tacticalOptions');grid.innerHTML='';opts.forEach(opt=>{const btn=document.createElement('button');btn.className='option-btn';btn.textContent=opt;btn.onclick=function(){selectPlayer(opt)};grid.appendChild(btn)});document.getElementById('tacticalProgress').style.width=((state.tacticalIndex/tacticalData.length)*100)+'%'}
+function selectSlot(slot){document.querySelectorAll('.formation-slot').forEach(s=>s.style.borderColor='');slot.style.borderColor='var(--primary)';state.selectedSlot=slot}
+function selectPlayer(player){if(!state.selectedSlot){alert('Pilih posisi di tactical board terlebih dahulu!');return}const pos=state.selectedSlot.getAttribute('data-pos');state.tacticalSelections[pos]=player;state.selectedSlot.querySelector('.slot-player').textContent=player;state.selectedSlot.classList.add('filled');state.selectedSlot.style.borderColor='';state.selectedSlot=null}
+function checkTactical(){const data=tacticalData[state.tacticalIndex];let correct=0;let total=0;for(let pos in data.formation){total++;if(state.tacticalSelections[pos]===data.formation[pos]){correct++}}const score=correct*25;const allCorrect=correct===total;document.getElementById('tacticalQuestion').style.display='none';document.getElementById('tacticalResult').style.display='block';if(allCorrect){document.getElementById('tacticalFeedback').innerHTML='<span style="color:var(--success)">🎉 SEMPURNA! '+correct+'/'+total+' benar!</span><br>+'+score+' poin';updateStreak(true);updateScore(score+(state.streak>2?10:0))}else{document.getElementById('tacticalFeedback').innerHTML='<span style="color:var(--warning)">⚠️ '+correct+'/'+total+' benar</span><br>+'+score+' poin<br><br>Jawaban benar:<br>GK: '+data.formation.GK+'<br>CB: '+data.formation.CB+'<br>CM: '+data.formation.CM+'<br>ST: '+data.formation.ST;updateStreak(false);updateScore(score)}}
+function nextTactical(){state.tacticalIndex++;if(state.tacticalIndex>=tacticalData.length){state.tacticalIndex=0;showOverlay('TACTICAL BOARD SELESAI!','100 POIN BONUS','Kamu telah menyelesaikan semua soal Tactical Board!');updateScore(100)}initTactical()}
+
+// ==================== TRANSFER DETECTIVE ====================
+function initTransfer(){const data=transferData[state.transferIndex];document.getElementById('transferHint').textContent='Tebak pemain dari rantai transfer berikut:';document.getElementById('transferQuestion').style.display='block';document.getElementById('transferResult').style.display='none';const chain=document.getElementById('transferChain');chain.innerHTML='';data.chain.forEach((club,i)=>{const node=document.createElement('div');node.className='transfer-node';node.textContent=club;chain.appendChild(node);if(i<data.chain.length-1){const arrow=document.createElement('div');arrow.className='transfer-arrow';arrow.textContent='→';chain.appendChild(arrow)}});const opts=shuffleArray(data.options);const grid=document.getElementById('transferOptions');grid.innerHTML='';opts.forEach(opt=>{const btn=document.createElement('button');btn.className='option-btn';btn.textContent=opt;btn.onclick=function(){checkTransfer(opt)};grid.appendChild(btn)});document.getElementById('transferProgress').style.width=((state.transferIndex/transferData.length)*100)+'%'}
+function checkTransfer(answer){const data=transferData[state.transferIndex];const correct=answer===data.player;document.getElementById('transferQuestion').style.display='none';document.getElementById('transferResult').style.display='block';if(correct){document.getElementById('transferFeedback').innerHTML='<span style="color:var(--success)">🎉 BENAR! Itu adalah '+data.player+'!</span><br>+100 poin';updateStreak(true);updateScore(100+(state.streak>2?20:0))}else{document.getElementById('transferFeedback').innerHTML='<span style="color:var(--danger)">❌ SALAH! Jawabannya adalah '+data.player+'</span><br>+0 poin';updateStreak(false)}}
+function revealTransferHint(){if(state.totalScore>=50){state.totalScore-=50;document.getElementById('totalScore').textContent=state.totalScore;const data=transferData[state.transferIndex];document.getElementById('transferHint').textContent='💡 Hint: '+data.hint}else{alert('Poin tidak cukup! Butuh 50 poin.')}}
+function nextTransfer(){state.transferIndex++;if(state.transferIndex>=transferData.length){state.transferIndex=0;showOverlay('TRANSFER DETECTIVE SELESAI!','100 POIN BONUS','Kamu telah menyelesaikan semua soal Transfer Detective!');updateScore(100)}initTransfer()}
+
+// ==================== DERBY DAYS ====================
+function initDerby(){const data=derbyData[state.derbyIndex];document.getElementById('derbyClue').textContent=data.clue;document.getElementById('derbyQuestion').style.display='block';document.getElementById('derbyResult').style.display='none';const matchup=document.getElementById('derbyMatchup');matchup.innerHTML='<div class="derby-team"><div class="team-name">'+data.team1+'</div></div><div class="derby-vs">VS</div><div class="derby-team"><div class="team-name">'+data.team2+'</div></div>';const opts=shuffleArray(data.options);const grid=document.getElementById('derbyOptions');grid.innerHTML='';opts.forEach(opt=>{const btn=document.createElement('button');btn.className='option-btn';btn.textContent=opt;btn.onclick=function(){checkDerby(opt)};grid.appendChild(btn)});document.getElementById('derbyProgress').style.width=((state.derbyIndex/derbyData.length)*100)+'%'}
+function checkDerby(answer){const data=derbyData[state.derbyIndex];const correct=answer===data.name;document.getElementById('derbyQuestion').style.display='none';document.getElementById('derbyResult').style.display='block';if(correct){document.getElementById('derbyFeedback').innerHTML='<span style="color:var(--success)">🎉 BENAR! Itu adalah '+data.name+'!</span><br>+80 poin';updateStreak(true);updateScore(80+(state.streak>2?15:0))}else{document.getElementById('derbyFeedback').innerHTML='<span style="color:var(--danger)">❌ SALAH! Jawabannya adalah '+data.name+'</span><br>+0 poin';updateStreak(false)}}
+function nextDerby(){state.derbyIndex++;if(state.derbyIndex>=derbyData.length){state.derbyIndex=0;showOverlay('DERBY DAYS SELESAI!','100 POIN BONUS','Kamu telah menyelesaikan semua soal Derby Days!');updateScore(100)}initDerby()}
+
+// ==================== KIT COLLECTOR ====================
+function initKit(){const data=kitData[state.kitIndex];document.getElementById('kitQuestion').style.display='block';document.getElementById('kitResult').style.display='none';document.getElementById('kitHint').style.display='none';const display=document.getElementById('kitDisplay');display.innerHTML='<div class="kit-shirt" style="background:'+data.home+'">H</div><div class="kit-shirt" style="background:'+data.away+'">A</div><div class="kit-shirt" style="background:'+data.third+'">3</div>';const opts=shuffleArray(data.options);const grid=document.getElementById('kitOptions');grid.innerHTML='';opts.forEach(opt=>{const btn=document.createElement('button');btn.className='option-btn';btn.textContent=opt;btn.onclick=function(){checkKit(opt)};grid.appendChild(btn)});document.getElementById('kitProgress').style.width=((state.kitIndex/kitData.length)*100)+'%'}
+function checkKit(answer){const data=kitData[state.kitIndex];const correct=answer===data.club;document.getElementById('kitQuestion').style.display='none';document.getElementById('kitResult').style.display='block';if(correct){document.getElementById('kitFeedback').innerHTML='<span style="color:var(--success)">🎉 BENAR! Itu adalah '+data.club+'!</span><br>+60 poin';updateStreak(true);updateScore(60+(state.streak>2?10:0))}else{document.getElementById('kitFeedback').innerHTML='<span style="color:var(--danger)">❌ SALAH! Jawabannya adalah '+data.club+'</span><br>+0 poin';updateStreak(false)}}
+function revealKitHint(){if(state.totalScore>=30){state.totalScore-=30;document.getElementById('totalScore').textContent=state.totalScore;const data=kitData[state.kitIndex];document.getElementById('kitHint').textContent='💡 Hint: '+data.hint;document.getElementById('kitHint').style.display='block'}else{alert('Poin tidak cukup! Butuh 30 poin.')}}
+function nextKit(){state.kitIndex++;if(state.kitIndex>=kitData.length){state.kitIndex=0;showOverlay('KIT COLLECTOR SELESAI!','100 POIN BONUS','Kamu telah menyelesaikan semua soal Kit Collector!');updateScore(100)}initKit()}
+
+// ==================== PENALTY RUSH ====================
+let penaltyQuestions=[];
+function startPenaltyRush(){state.penaltyActive=true;state.penaltyScore=0;state.penaltyShots=0;state.penaltyTime=60;penaltyQuestions=shuffleArray(penaltyData).slice(0,10);document.getElementById('penaltyStart').style.display='none';document.getElementById('penaltyQuestion').style.display='block';document.getElementById('penaltyResult').style.display='none';document.getElementById('goalCount').textContent='0';document.getElementById('shotCount').textContent='0';updatePenaltyTimer();state.penaltyTimerId=setInterval(function(){state.penaltyTime--;updatePenaltyTimer();if(state.penaltyTime<=0||state.penaltyShots>=10){endPenaltyRush()}},1000);showPenaltyQuestion()}
+function updatePenaltyTimer(){document.getElementById('timerDisplay').textContent=state.penaltyTime;document.getElementById('penaltyTimer').style.width=((state.penaltyTime/60)*100)+'%'}
+function showPenaltyQuestion(){if(state.penaltyShots>=10||state.penaltyTime<=0)return;const q=penaltyQuestions[state.penaltyShots];document.getElementById('penaltyQText').textContent=q.q;const opts=shuffleArray(q.options);const grid=document.getElementById('penaltyOptions');grid.innerHTML='';opts.forEach(opt=>{const btn=document.createElement('button');btn.className='option-btn';btn.textContent=opt;btn.onclick=function(){answerPenalty(opt)};grid.appendChild(btn)})}
+function answerPenalty(answer){const q=penaltyQuestions[state.penaltyShots];const correct=answer===q.a;state.penaltyShots++;document.getElementById('shotCount').textContent=state.penaltyShots;if(correct){state.penaltyScore++;document.getElementById('goalCount').textContent=state.penaltyScore;updateScore(20);updateStreak(true)}else{updateStreak(false)}if(state.penaltyShots<10&&state.penaltyTime>0){showPenaltyQuestion()}else{endPenaltyRush()}}
+function endPenaltyRush(){clearInterval(state.penaltyTimerId);state.penaltyActive=false;document.getElementById('penaltyQuestion').style.display='none';document.getElementById('penaltyResult').style.display='block';const accuracy=Math.round((state.penaltyScore/state.penaltyShots)*100)||0;let title,message;if(state.penaltyScore>=8){title='🏆 PENALTY KING!';message='Luar biasa! Kamu seperti pemain penalti terbaik di dunia!'}else if(state.penaltyScore>=5){title='⚽ BAGUS!';message='Cukup solid! Tingkatkan akurasi tendanganmu!'}else if(state.penaltyScore>=3){title='😐 BISA LEBIH BAIK';message='Jangan menyerah! Latih tendangan penaltimu!'}else{title='😅 BUTUH LATIHAN';message='Jangan khawatir, bahkan Messi pernah gagal penalti!'}
+document.getElementById('penaltyFeedback').innerHTML='<span style="color:'+(state.penaltyScore>=5?'var(--success)':'var(--warning)')+'">'+title+'</span><br><span style="font-size:3rem;">'+state.penaltyScore+'/10</span>';document.getElementById('penaltyStats').textContent='Akurasi: '+accuracy+'% | Waktu tersisa: '+state.penaltyTime+' detik';if(state.penaltyScore>=8){updateScore(50);showOverlay('BONUS AKURASI!','50 POIN','Akurasi penalti di atas 80%!')}}
+function resetPenalty(){document.getElementById('penaltyStart').style.display='block';document.getElementById('penaltyResult').style.display='none';document.getElementById('penaltyQuestion').style.display='none';document.getElementById('timerDisplay').textContent='60';document.getElementById('penaltyTimer').style.width='100%';document.getElementById('goalCount').textContent='0';document.getElementById('shotCount').textContent='0'}
+
+// ==================== FOOTBALL TIMELINE ====================
+let currentTimelineEvents=[];
+function initTimeline(){const data=timelineData[state.timelineIndex];document.getElementById('timelineQuestion').style.display='block';document.getElementById('timelineResult').style.display='none';currentTimelineEvents=shuffleArray([...data.events]);renderTimeline();document.getElementById('timelineProgress').style.width=((state.timelineIndex/timelineData.length)*100)+'%'}
+function renderTimeline(){const container=document.getElementById('timelineItems');container.innerHTML='';currentTimelineEvents.forEach((evt,i)=>{const card=document.createElement('div');card.className='timeline-card';card.innerHTML='<div class="timeline-year">'+evt.year+'</div><div class="timeline-event">'+evt.event+'</div>';card.onclick=function(){moveTimelineItem(i)};container.appendChild(card)})}
+function moveTimelineItem(index){if(index<currentTimelineEvents.length-1){const temp=currentTimelineEvents[index];currentTimelineEvents[index]=currentTimelineEvents[index+1];currentTimelineEvents[index+1]=temp}else{const temp=currentTimelineEvents[index];currentTimelineEvents[index]=currentTimelineEvents[0];currentTimelineEvents[0]=temp}renderTimeline()}
+function checkTimeline(){const data=timelineData[state.timelineIndex];let correct=0;for(let i=0;i<currentTimelineEvents.length;i++){if(currentTimelineEvents[i].year===data.events[i].year){correct++}}const score=Math.round((correct/currentTimelineEvents.length)*100);const allCorrect=correct===currentTimelineEvents.length;document.getElementById('timelineQuestion').style.display='none';document.getElementById('timelineResult').style.display='block';if(allCorrect){document.getElementById('timelineFeedback').innerHTML='<span style="color:var(--success)">🎉 SEMPURNA! Semua urutan benar!</span><br>+'+score+' poin';updateStreak(true);updateScore(score+(state.streak>2?20:0))}else{document.getElementById('timelineFeedback').innerHTML='<span style="color:var(--warning)">⚠️ '+correct+'/'+currentTimelineEvents.length+' benar</span><br>+'+score+' poin';updateStreak(false);updateScore(score)}}
+function shuffleTimeline(){const data=timelineData[state.timelineIndex];currentTimelineEvents=shuffleArray([...data.events]);renderTimeline()}
+function nextTimeline(){state.timelineIndex++;if(state.timelineIndex>=timelineData.length){state.timelineIndex=0;showOverlay('FOOTBALL TIMELINE SELESAI!','100 POIN BONUS','Kamu telah menyelesaikan semua soal Football Timeline!');updateScore(100)}initTimeline()}
+
+// ==================== INIT ====================
+window.onload=function(){createParticles();initTactical();initTransfer();initDerby();initKit();initTimeline()};
+</script>
+</body>
+</html>
